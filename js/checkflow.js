@@ -9,8 +9,16 @@ CRM.$(function ($) {
     toggleStatuses($('#activity_type_id').val(), CHECK_REQUEST);
   });
 
+
   // Set the initial state for the status IDs.
-  toggleStatuses($('#activity_type_id').val(), CHECK_REQUEST);
+  if (typeof $('#activity_type_id').val() != 'undefined') {
+    toggleStatuses($('#activity_type_id').val(), CHECK_REQUEST);
+  }
+  // Check for a preset activity.
+  if (typeof CRM.vars != 'undefined' && typeof CRM.vars.checkflow != 'undefined') {
+    console.log(CRM.vars.checkflow.atype);
+    toggleStatuses(CRM.vars.checkflow.atype, CHECK_REQUEST);
+  }
 });
 
 // Set the status for check requests.

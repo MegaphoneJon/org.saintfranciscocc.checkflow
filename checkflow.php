@@ -10,6 +10,13 @@ require_once 'checkflow.civix.php';
  */
 function checkflow_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Activity_Form_Activity') {
+    // Depending on how this form is called, the activity type may be pre-set in
+    // the URL.
+    if (isset($_GET['atype'])) {
+      //force to int
+      $atype = (int) $_GET['atype'];
+      CRM_Core_Resources::singleton()->addVars('checkflow', array('atype' => $atype));
+    }
     // add the Javascript to control the display of the activity entry form.
     if ($form->_action == CRM_Core_Action::ADD || $form->_action == CRM_Core_Action::UPDATE) {
       CRM_Core_Resources::singleton()->addScriptFile('org.saintfranciscocc.checkflow', 'js/checkflow.js');
