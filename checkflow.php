@@ -22,7 +22,7 @@ function checkflow_civicrm_buildForm($formName, &$form) {
       CRM_Core_Resources::singleton()->addScriptFile('org.saintfranciscocc.checkflow', 'js/checkflow.js');
     }
     // Add the activity history to the page.
-    if ($form->_action == CRM_Core_Action::VIEW  && $form->_activityTypeName == 'Check Request') {
+    if (($form->_action == CRM_Core_Action::VIEW || $form->_action == CRM_Core_Action::UPDATE) && $form->_activityTypeName == 'Check Request') {
       checkflow_getActivityLog($form->_activityId, $form);
       CRM_Core_Region::instance('page-body')->add(array(
         'template' => 'CRM/Checkflow/ActivityLog.tpl',
@@ -33,13 +33,17 @@ function checkflow_civicrm_buildForm($formName, &$form) {
 
 function checkflow_getActivityLog($activityId, &$form) {
   $query = "
-  SELECT lca.log_date, cc.display_name, cov.label
-  FROM log_civicrm_activity lca
-  LEFT JOIN civicrm_contact cc ON lca.log_user_id = cc.id
-  LEFT JOIN civicrm_option_value cov ON lca.status_id = cov.value
-  JOIN civicrm_option_group cog ON cov.option_group_id = cog.id
-  WHERE lca.id = %1 AND cog.name = 'activity_status'
-  ORDER BY lca.log_date DESC
+    SELECT lca.log_date, cc.display_name, cov.label, cc_routed.display_name AS routed_to
+    FROM log_civicrm_activity lca
+    LEFT JOIN civicrm_contact cc ON lca.log_user_id = cc.id
+    LEFT JOIN civicrm_option_value cov ON lca.status_id = cov.value
+    JOIN civicrm_option_group cog ON cov.option_group_id = cog.id
+    LEFT JOIN log_civicrm_activity_contact lcac ON lca.log_conn_id = lcac.log_conn_id
+    LEFT JOIN civicrm_contact cc_routed ON lcac.contact_id = cc_routed.id
+    WHERE lca.id = 626
+    AND cog.name = 'activity_status'
+    AND lcac.record_type_id = 1 AND lcac.log_action = 'Insert'
+    ORDER BY lca.log_date DESC;
   ";
 
   $params = array(1 => array($activityId, 'Integer'));
@@ -51,6 +55,7 @@ function checkflow_getActivityLog($activityId, &$form) {
     $activityLog[$i]['log_date'] = $dao->log_date;
     $activityLog[$i]['editor'] = $dao->display_name;
     $activityLog[$i]['status'] = $dao->label;
+    $activityLog[$i]['routed_to'] = $dao->routed_to;
     $i++;
   }
   $dao->free();
