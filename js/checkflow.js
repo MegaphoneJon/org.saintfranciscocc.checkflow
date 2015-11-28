@@ -22,8 +22,10 @@ function toggleStatuses(activity_id, CHECK_REQUEST) {
   var normal_statuses= ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
   if (activity_id == CHECK_REQUEST) {
     keep_statuses = check_statuses;
+    hideFinancialFields(true);
   } else {
     keep_statuses = normal_statuses;
+    hideFinancialFields(false);
   }
   // remove all the statuses that aren't keep_statuses.
   CRM.$("#status_id option").each(function()
@@ -35,5 +37,21 @@ function toggleStatuses(activity_id, CHECK_REQUEST) {
   // Clear the status if it's currently set to an unavailable status.
   if(CRM.$("#s2id_status_id").select2("val") == "1") {
     CRM.$('#s2id_status_id').select2("val", "");
+  }
+}
+
+// Hide the fields that don't get shown for check requests.
+function hideFinancialFields(bool) {
+  var financial_fields = [
+    ".crm-activity-form-block-duration",
+    ".crm-activity-form-block-recurring_activity",
+    ".crm-activity-form-block-schedule_followup",
+    ".crm-activity-form-block-campaign_id",
+    ".crm-activity-form-block-engagement_level",
+    ];
+  if (bool) {
+    CRM.$.each(financial_fields, function(key, value) {CRM.$(value).hide();});
+  } else {
+    CRM.$.each(financial_fields, function(key, value) {CRM.$(value).show();});
   }
 }
