@@ -5,14 +5,50 @@ require_once 'checkflow.civix.php';
 /**
  * Implements hook_civicrm_buildForm().
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
+ * @link
+ * http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
  */
 function checkflow_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Activity_Form_Activity') {
-    CRM_Core_Resources::singleton()->addScriptFile('org.saintfranciscocc.checkflow', 'js/checkflow.js');
+    // add the Javascript to control the display of the activity entry form.
+    if ($form->_action == CRM_Core_Action::ADD || $form->_action == CRM_Core_Action::UPDATE) {
+      CRM_Core_Resources::singleton()->addScriptFile('org.saintfranciscocc.checkflow', 'js/checkflow.js');
+    }
+    // Add the activity history to the page.
+    if ($form->_action == CRM_Core_Action::VIEW  && $form->_activityTypeName == 'Check Request') {
+      checkflow_getActivityLog($form->_activityId, $form);
+      CRM_Core_Region::instance('page-body')->add(array(
+        'template' => 'CRM/Checkflow/ActivityLog.tpl',
+      ));
+    }
   }
 }
 
+function checkflow_getActivityLog($activityId, &$form) {
+  $query = "
+  SELECT lca.log_date, cc.display_name, cov.label
+  FROM log_civicrm_activity lca
+  LEFT JOIN civicrm_contact cc ON lca.log_user_id = cc.id
+  LEFT JOIN civicrm_option_value cov ON lca.status_id = cov.value
+  JOIN civicrm_option_group cog ON cov.option_group_id = cog.id
+  WHERE lca.id = %1 AND cog.name = 'activity_status'
+  ORDER BY lca.log_date DESC
+  ";
+
+  $params = array(1 => array($activityId, 'Integer'));
+  $dao = CRM_Core_DAO::executeQuery($query, $params);
+
+  $i = 0;
+
+  while ($dao->fetch()) {
+    $activityLog[$i]['log_date'] = $dao->log_date;
+    $activityLog[$i]['editor'] = $dao->display_name;
+    $activityLog[$i]['status'] = $dao->label;
+    $i++;
+  }
+  $dao->free();
+  $form->assign('activityLog', $activityLog);
+}
 
 /**
  * Implements hook_civicrm_config().
