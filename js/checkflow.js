@@ -1,23 +1,13 @@
 CRM.$(function ($) {
   'use strict';
   const CHECK_REQUEST = 54;
-  var all_statuses = [];
-  // Collect the statuses in their default state.
-  CRM.$("#status_id option").each(function() {
-    console.log($(this).text());
-    all_statuses[$(this).val()] = $(this).text();
-  });
+
+  // Grab a snapshot of the activity_status_id options.
+  var all_statuses = $("#status_id").html();
 
   // if the activity type changes
   $('#activity_type_id').change(function() {
-    CRM.$("#status_id option").remove();
-    // Regenerate the standard list of options.
-    CRM.$.each(all_statuses, function(key, value) {
-      CRM.$('#status_id')
-        .append(CRM.$("<option></option")
-        .attr("value",key)
-        .text(value));
-    });
+    $("#status_id").html(all_statuses);
     toggleStatuses($('#activity_type_id').val(), CHECK_REQUEST);
   });
 
@@ -37,7 +27,6 @@ function toggleStatuses(activity_id, CHECK_REQUEST) {
   } else {
     keep_statuses = normal_statuses;
   }
-  console.log(keep_statuses);
   // remove all the statuses that aren't keep_statuses.
   CRM.$("#status_id option").each(function()
   {
