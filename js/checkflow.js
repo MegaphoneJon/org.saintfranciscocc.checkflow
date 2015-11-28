@@ -4,8 +4,6 @@ CRM.$(function ($) {
 
   // Grab a snapshot of the activity_status_id options.
   var all_statuses = $("#status_id").html();
-
-  // if the activity type changes
   $('#activity_type_id').change(function() {
     $("#status_id").html(all_statuses);
     toggleStatuses($('#activity_type_id').val(), CHECK_REQUEST);
@@ -30,7 +28,7 @@ function toggleStatuses(activity_id, CHECK_REQUEST) {
   // remove all the statuses that aren't keep_statuses.
   CRM.$("#status_id option").each(function()
   {
-    if (keep_statuses.indexOf(CRM.$(this).val()) == -1) {
+    if (keep_statuses.indexOf(CRM.$(this).val()) == -1 && CRM.$(this).text() !== '- any -') {
       CRM.$(this).remove();
     }
   });
