@@ -40,7 +40,7 @@ function checkflow_getActivityLog($activityId, &$form) {
     JOIN civicrm_option_group cog ON cov.option_group_id = cog.id
     LEFT JOIN log_civicrm_activity_contact lcac ON lca.log_conn_id = lcac.log_conn_id
     LEFT JOIN civicrm_contact cc_routed ON lcac.contact_id = cc_routed.id
-    WHERE lca.id = 626
+    WHERE lca.id = %1
     AND cog.name = 'activity_status'
     AND lcac.record_type_id = 1 AND lcac.log_action = 'Insert'
     ORDER BY lca.log_date DESC;
